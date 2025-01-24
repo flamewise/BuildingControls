@@ -1,0 +1,12 @@
+com/example/buildingcontrols/models/Room.class
+com/example/buildingcontrols/models/CommonRoomType.class
+com/example/buildingcontrols/controllers/BuildingController.class
+com/example/buildingcontrols/models/Apartment.class
+com/example/buildingcontrols/services/TemperatureService.class
+com/example/buildingcontrols/ui/MainWindow.class
+com/example/buildingcontrols/controllers/CLI.class
+com/example/buildingcontrols/ui/AddRoomDialog.class
+com/example/buildingcontrols/ui/TemperaturePanel.class
+com/example/buildingcontrols/Main.class
+com/example/buildingcontrols/models/CommonRoom.class
+com/example/buildingcontrols/utils/RandomTemperatureGenerator.class
