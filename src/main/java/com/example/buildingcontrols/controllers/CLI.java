@@ -72,5 +72,19 @@ public class CLI {
         Building newBuilding = new Building(id, name);
         controller.addBuilding(newBuilding);
         System.out.println("Building added successfully!");
-    }    
+    }
+
+    private void listBuildings() {
+        BuildingController controller = new BuildingController();
+        var buildings = controller.getAllBuildings();
+    
+        if (buildings.isEmpty()) {
+            System.out.println("No buildings found.");
+        } else {
+            System.out.println("\nList of Buildings:");
+            for (Building building : buildings) {
+                System.out.println(building);
+            }
+        }
+    } 
 }
