@@ -53,4 +53,24 @@ public class CLI {
                 System.out.println("Invalid choice. Please try again.");
         }
     }
+
+    private void addBuilding(Scanner scanner) {
+        System.out.print("Enter Building ID: ");
+        String id = scanner.nextLine();
+    
+        System.out.print("Enter Building Name: ");
+        String name = scanner.nextLine();
+    
+        BuildingController controller = new BuildingController();
+        Building existingBuilding = controller.getBuildingById(id);
+    
+        if (existingBuilding != null) {
+            System.out.println("Building ID already exists. Try again.");
+            return;
+        }
+    
+        Building newBuilding = new Building(id, name);
+        controller.addBuilding(newBuilding);
+        System.out.println("Building added successfully!");
+    }    
 }
