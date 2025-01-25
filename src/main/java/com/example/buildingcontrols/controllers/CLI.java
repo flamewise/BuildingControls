@@ -86,5 +86,39 @@ public class CLI {
                 System.out.println(building);
             }
         }
-    } 
+    }
+
+    private void addRoomToBuilding(Scanner scanner) {
+        System.out.print("Enter Building ID: ");
+        String buildingId = scanner.nextLine();
+    
+        BuildingController controller = new BuildingController();
+        Building building = controller.getBuildingById(buildingId);
+    
+        if (building == null) {
+            System.out.println("Building not found. Try again.");
+            return;
+        }
+    
+        System.out.print("Enter Room ID: ");
+        String roomId = scanner.nextLine();
+    
+        System.out.print("Enter Room Type (Room/Apartment): ");
+        String roomType = scanner.nextLine().toLowerCase();
+    
+        if (roomType.equals("room")) {
+            Room room = new Room(roomId);
+            controller.addRoomToBuilding(buildingId, room);
+            System.out.println("Room added successfully!");
+        } else if (roomType.equals("apartment")) {
+            System.out.print("Enter Owner Name: ");
+            String ownerName = scanner.nextLine();
+    
+            Apartment apartment = new Apartment(roomId, ownerName);
+            controller.addRoomToBuilding(buildingId, apartment);
+            System.out.println("Apartment added successfully!");
+        } else {
+            System.out.println("Invalid room type. Try again.");
+        }
+    }    
 }
