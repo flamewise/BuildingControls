@@ -63,7 +63,7 @@ public class MainWindow extends JFrame {
         repaint();
     }
 
-    private void addBuilding() {
+    protected void addBuilding() {
         JTextField buildingIdField = new JTextField();
         JTextField buildingNameField = new JTextField();
 
@@ -95,7 +95,7 @@ public class MainWindow extends JFrame {
         }
     }
 
-    private void showBuildingSelectionMenu() {
+    protected void showBuildingSelectionMenu() {
         getContentPane().removeAll();
         setLayout(new BorderLayout());
 
