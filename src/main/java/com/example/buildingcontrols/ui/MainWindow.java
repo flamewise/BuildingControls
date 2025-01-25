@@ -1,88 +1,230 @@
 package com.example.buildingcontrols.ui;
 
+import com.example.buildingcontrols.controllers.BuildingController;
+import com.example.buildingcontrols.models.Building;
+import com.example.buildingcontrols.models.Room;
+import com.example.buildingcontrols.services.TemperatureManager;
+
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.util.List;
 
 public class MainWindow extends JFrame {
+    private final BuildingController controller;
+    private final TemperatureManager temperatureManager; // Background temperature management
+    private Building currentBuilding;
 
     public MainWindow() {
-        // Set up the main window
-        setTitle("Building Controls Application");
+        controller = BuildingController.getInstance();
+        temperatureManager = new TemperatureManager(); // Initialize TemperatureManager
+        temperatureManager.start(); // Start background temperature management
+        initializeUI();
+    }
+
+    private void initializeUI() {
+        setTitle("Building Controls");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); // Center the window
+        setLocationRelativeTo(null);
 
-        // Create the main panel
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new GridLayout(0, 1, 10, 10)); // One column, variable rows
+        // Ensure the background thread stops gracefully on exit
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                temperatureManager.stop(); // Stop TemperatureManager
+            }
+        });
 
-        // Add buttons for each CLI functionality
+        showMainMenu();
+    }
+
+    private void showMainMenu() {
+        getContentPane().removeAll();
+        setLayout(new GridLayout(4, 1));
+
         JButton addBuildingButton = new JButton("Add Building");
-        JButton listBuildingsButton = new JButton("List Buildings");
-        JButton addRoomButton = new JButton("Add Room/Apartment");
-        JButton viewBuildingDetailsButton = new JButton("View Building Details");
-        JButton adjustTemperatureButton = new JButton("Adjust Building Temperature");
+        JButton listBuildingsButton = new JButton("List Buildings and Select");
         JButton exitButton = new JButton("Exit");
 
-        // Add action listeners to buttons
-        addBuildingButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Add Building functionality triggered.");
+        addBuildingButton.addActionListener(e -> addBuilding());
+        listBuildingsButton.addActionListener(e -> showBuildingSelectionMenu());
+        exitButton.addActionListener(e -> System.exit(0));
+
+        add(addBuildingButton);
+        add(listBuildingsButton);
+        add(exitButton);
+
+        revalidate();
+        repaint();
+    }
+
+    private void addBuilding() {
+        JTextField buildingIdField = new JTextField();
+        JTextField buildingNameField = new JTextField();
+
+        Object[] message = {
+            "Building ID:", buildingIdField,
+            "Building Name:", buildingNameField
+        };
+
+        int option = JOptionPane.showConfirmDialog(this, message, "Add Building", JOptionPane.OK_CANCEL_OPTION);
+
+        if (option == JOptionPane.OK_OPTION) {
+            String buildingId = buildingIdField.getText().trim();
+            String buildingName = buildingNameField.getText().trim();
+
+            if (buildingId.isEmpty() || buildingName.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Building ID and Name cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
             }
+
+            Building existingBuilding = controller.getBuildingById(buildingId);
+            if (existingBuilding != null) {
+                JOptionPane.showMessageDialog(this, "Building ID already exists. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            Building newBuilding = new Building(buildingId, buildingName);
+            controller.addBuilding(newBuilding);
+            JOptionPane.showMessageDialog(this, "Building added successfully!");
+        }
+    }
+
+    private void showBuildingSelectionMenu() {
+        getContentPane().removeAll();
+        setLayout(new BorderLayout());
+
+        JLabel titleLabel = new JLabel("Select a Building:");
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        add(titleLabel, BorderLayout.NORTH);
+
+        DefaultListModel<String> buildingListModel = new DefaultListModel<>();
+        List<Building> buildings = controller.getAllBuildings();
+
+        for (Building building : buildings) {
+            buildingListModel.addElement(building.getId() + " - " + building.getName());
+        }
+
+        JList<String> buildingList = new JList<>(buildingListModel);
+        JScrollPane scrollPane = new JScrollPane(buildingList);
+        add(scrollPane, BorderLayout.CENTER);
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(1, 2));
+
+        JButton selectButton = new JButton("Select");
+        JButton backButton = new JButton("Back");
+
+        selectButton.addActionListener(e -> {
+            int selectedIndex = buildingList.getSelectedIndex();
+            if (selectedIndex == -1) {
+                JOptionPane.showMessageDialog(this, "Please select a building.");
+                return;
+            }
+            currentBuilding = buildings.get(selectedIndex);
+            showBuildingMenu();
         });
 
-        listBuildingsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "List Buildings functionality triggered.");
-            }
+        backButton.addActionListener(e -> showMainMenu());
+
+        buttonPanel.add(selectButton);
+        buttonPanel.add(backButton);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        revalidate();
+        repaint();
+    }
+
+    private void showBuildingMenu() {
+        getContentPane().removeAll();
+        setLayout(new BorderLayout());
+
+        // Building Details Panel
+        JPanel buildingDetailsPanel = new JPanel(new GridLayout(2, 1));
+        JLabel buildingNameLabel = new JLabel("Building Name: " + currentBuilding.getName());
+        JLabel requestedTempLabel = new JLabel("Requested Temperature: " + currentBuilding.getRequestedTemperature() + "°C");
+        buildingDetailsPanel.add(buildingNameLabel);
+        buildingDetailsPanel.add(requestedTempLabel);
+        add(buildingDetailsPanel, BorderLayout.NORTH);
+
+        // Room Details Panel
+        DefaultListModel<String> roomListModel = new DefaultListModel<>();
+        for (Room room : currentBuilding.getRooms()) {
+            roomListModel.addElement(room.toString());
+        }
+        JList<String> roomList = new JList<>(roomListModel);
+        JScrollPane roomScrollPane = new JScrollPane(roomList);
+        add(roomScrollPane, BorderLayout.CENTER);
+
+        // Button Panel
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new GridLayout(1, 3));
+
+        JButton addRoomButton = new JButton("Add Room/Apartment");
+        JButton adjustTemperatureButton = new JButton("Adjust Building Temperature");
+        JButton returnButton = new JButton("Return to Main Menu");
+
+        addRoomButton.addActionListener(e -> addRoom());
+        adjustTemperatureButton.addActionListener(e -> adjustTemperature());
+        returnButton.addActionListener(e -> {
+            currentBuilding = null; // Clear current session
+            showMainMenu();
         });
 
-        addRoomButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Add Room/Apartment functionality triggered.");
+        buttonPanel.add(addRoomButton);
+        buttonPanel.add(adjustTemperatureButton);
+        buttonPanel.add(returnButton);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        revalidate();
+        repaint();
+    }
+
+    private void addRoom() {
+        String roomId = JOptionPane.showInputDialog(this, "Enter Room ID:");
+        String[] options = {"CommonRoom", "Apartment"};
+        String roomType = (String) JOptionPane.showInputDialog(this, "Select Room Type:",
+                "Room Type", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+
+        if (roomType == null || roomId == null || roomId.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Invalid input. Try again.");
+            return;
+        }
+
+        if (roomType.equals("CommonRoom")) {
+            String capacityStr = JOptionPane.showInputDialog(this, "Enter Capacity:");
+            int capacity = Integer.parseInt(capacityStr);
+
+            String[] commonRoomTypes = {"GYM", "LIBRARY", "LAUNDRY"};
+            String commonRoomType = (String) JOptionPane.showInputDialog(this, "Select Common Room Type:",
+                    "Common Room Type", JOptionPane.QUESTION_MESSAGE, null, commonRoomTypes, commonRoomTypes[0]);
+
+            if (commonRoomType == null) {
+                JOptionPane.showMessageDialog(this, "Invalid input. Try again.");
+                return;
             }
-        });
 
-        viewBuildingDetailsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "View Building Details functionality triggered.");
-            }
-        });
+            currentBuilding.addRoom(new Room(roomId)); // Adjust Room creation logic here.
+            JOptionPane.showMessageDialog(this, "Common Room added successfully!");
+        } else if (roomType.equals("Apartment")) {
+            String ownerName = JOptionPane.showInputDialog(this, "Enter Owner Name:");
+            currentBuilding.addRoom(new Room(roomId)); // Adjust Room creation logic here.
+            JOptionPane.showMessageDialog(this, "Apartment added successfully!");
+        }
+    }
 
-        adjustTemperatureButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(null, "Adjust Temperature functionality triggered.");
-            }
-        });
-
-        exitButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                System.exit(0);
-            }
-        });
-
-        // Add buttons to the panel
-        mainPanel.add(addBuildingButton);
-        mainPanel.add(listBuildingsButton);
-        mainPanel.add(addRoomButton);
-        mainPanel.add(viewBuildingDetailsButton);
-        mainPanel.add(adjustTemperatureButton);
-        mainPanel.add(exitButton);
-
-        // Add the panel to the frame
-        add(mainPanel);
+    private void adjustTemperature() {
+        String newTempStr = JOptionPane.showInputDialog(this, "Enter new temperature for the building:");
+        try {
+            double newTemp = Double.parseDouble(newTempStr);
+            currentBuilding.setRequestedTemperature(newTemp);
+            JOptionPane.showMessageDialog(this, "Temperature updated successfully!");
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Invalid input. Please enter a valid number.");
+        }
     }
 
     public static void main(String[] args) {
-        // Run the GUI
         SwingUtilities.invokeLater(() -> {
             MainWindow mainWindow = new MainWindow();
             mainWindow.setVisible(true);

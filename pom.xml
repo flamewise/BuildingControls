@@ -38,7 +38,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>com.example.buildingcontrols.Main</mainClass>
+                    <mainClass>com.example.buildingcontrols.ui.MainWindow</mainClass>
                 </configuration>
             </plugin>
         </plugins>
