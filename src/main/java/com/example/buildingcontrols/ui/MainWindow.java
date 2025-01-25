@@ -3,16 +3,21 @@ package com.example.buildingcontrols.ui;
 import com.example.buildingcontrols.controllers.BuildingController;
 import com.example.buildingcontrols.models.Building;
 import com.example.buildingcontrols.models.Room;
+import com.example.buildingcontrols.models.Apartment;
+import com.example.buildingcontrols.models.CommonRoom;
+import com.example.buildingcontrols.models.CommonRoomType;
 import com.example.buildingcontrols.services.TemperatureManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import javax.swing.Timer;
 
 public class MainWindow extends JFrame {
     private final BuildingController controller;
     private final TemperatureManager temperatureManager; // Background temperature management
     private Building currentBuilding;
+    private Timer roomUpdateTimer;
 
     public MainWindow() {
         controller = BuildingController.getInstance();
@@ -138,7 +143,7 @@ public class MainWindow extends JFrame {
     private void showBuildingMenu() {
         getContentPane().removeAll();
         setLayout(new BorderLayout());
-
+    
         // Building Details Panel
         JPanel buildingDetailsPanel = new JPanel(new GridLayout(2, 1));
         JLabel buildingNameLabel = new JLabel("Building Name: " + currentBuilding.getName());
@@ -146,38 +151,87 @@ public class MainWindow extends JFrame {
         buildingDetailsPanel.add(buildingNameLabel);
         buildingDetailsPanel.add(requestedTempLabel);
         add(buildingDetailsPanel, BorderLayout.NORTH);
-
+    
         // Room Details Panel
-        DefaultListModel<String> roomListModel = new DefaultListModel<>();
-        for (Room room : currentBuilding.getRooms()) {
-            roomListModel.addElement(room.toString());
-        }
-        JList<String> roomList = new JList<>(roomListModel);
-        JScrollPane roomScrollPane = new JScrollPane(roomList);
+        JPanel roomPanel = new JPanel();
+        roomPanel.setLayout(new BoxLayout(roomPanel, BoxLayout.Y_AXIS));
+        JScrollPane roomScrollPane = new JScrollPane(roomPanel);
         add(roomScrollPane, BorderLayout.CENTER);
-
+    
+        // Populate Room Data Dynamically
+        Timer roomUpdateTimer = new Timer(1000, e -> {
+            updateRoomPanel(roomPanel);
+            requestedTempLabel.setText("Requested Temperature: " + currentBuilding.getRequestedTemperature() + "°C");
+        });
+        roomUpdateTimer.start();
+    
         // Button Panel
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new GridLayout(1, 3));
-
+    
         JButton addRoomButton = new JButton("Add Room/Apartment");
         JButton adjustTemperatureButton = new JButton("Adjust Building Temperature");
         JButton returnButton = new JButton("Return to Main Menu");
-
+    
         addRoomButton.addActionListener(e -> addRoom());
-        adjustTemperatureButton.addActionListener(e -> adjustTemperature());
+        adjustTemperatureButton.addActionListener(e -> {
+            adjustTemperature();
+            requestedTempLabel.setText("Requested Temperature: " + currentBuilding.getRequestedTemperature() + "°C");
+        });
         returnButton.addActionListener(e -> {
             currentBuilding = null; // Clear current session
+            roomUpdateTimer.stop(); // Stop the timer when returning to the main menu
             showMainMenu();
         });
-
+    
         buttonPanel.add(addRoomButton);
         buttonPanel.add(adjustTemperatureButton);
         buttonPanel.add(returnButton);
         add(buttonPanel, BorderLayout.SOUTH);
-
+    
         revalidate();
         repaint();
+    }
+    
+
+    private void updateRoomPanel(JPanel roomPanel) {
+        roomPanel.removeAll();
+    
+        for (Room room : currentBuilding.getRooms()) {
+            JPanel roomRow = new JPanel();
+            roomRow.setLayout(new FlowLayout(FlowLayout.LEFT));
+    
+            // Room ID and Temperature
+            JLabel roomIdLabel = new JLabel("Room ID: " + room.getId());
+            JLabel tempLabel = new JLabel("Temperature: " + String.format("%.1f°C", room.getTemperature()));
+    
+            // Status Icon
+            JLabel statusIcon = new JLabel("●");
+            if (room.isHeatingEnabled()) {
+                statusIcon.setForeground(Color.RED); // Heating enabled
+            } else if (room.isCoolingEnabled()) {
+                statusIcon.setForeground(Color.BLUE); // Cooling enabled
+            } else {
+                statusIcon.setForeground(Color.GRAY); // Neither
+            }
+    
+            roomRow.add(roomIdLabel);
+            roomRow.add(tempLabel);
+            roomRow.add(statusIcon);
+    
+            // Add Mouse Listener for Details
+            roomRow.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent e) {
+                    showRoomDetails(room);
+                }
+            });
+    
+            roomPanel.add(roomRow);
+        }
+    
+        roomPanel.revalidate();
+        roomPanel.repaint();
     }
 
     private void addRoom() {
@@ -230,4 +284,34 @@ public class MainWindow extends JFrame {
             mainWindow.setVisible(true);
         });
     }
+
+    private void showRoomDetails(Room room) {
+        JDialog detailsDialog = new JDialog(this, "Room Details", true);
+        detailsDialog.setSize(300, 200);
+        detailsDialog.setLayout(new BorderLayout());
+    
+        StringBuilder details = new StringBuilder();
+        details.append("Room ID: ").append(room.getId()).append("\n");
+        details.append("Temperature: ").append(String.format("%.1f°C", room.getTemperature())).append("\n");
+    
+        if (room instanceof Apartment) {
+            details.append("Type: Apartment\n");
+            details.append("Owner Name: ").append(((Apartment) room).getOwnerName()).append("\n");
+        } else if (room instanceof CommonRoom) {
+            details.append("Type: Common Room\n");
+            details.append("Capacity: ").append(((CommonRoom) room).getCapacity()).append("\n");
+            details.append("Common Room Type: ").append(((CommonRoom) room).getType()).append("\n");
+        }
+    
+        JTextArea detailsArea = new JTextArea(details.toString());
+        detailsArea.setEditable(false);
+        detailsDialog.add(new JScrollPane(detailsArea), BorderLayout.CENTER);
+    
+        JButton closeButton = new JButton("Close");
+        closeButton.addActionListener(e -> detailsDialog.dispose());
+        detailsDialog.add(closeButton, BorderLayout.SOUTH);
+    
+        detailsDialog.setLocationRelativeTo(this);
+        detailsDialog.setVisible(true);
+    }    
 }
