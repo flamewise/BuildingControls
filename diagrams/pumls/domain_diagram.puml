@@ -1,0 +1,45 @@
+@startuml
+class Building {
+    - id : String
+    - name : String
+    - requestedTemperature : double
+    - rooms : List<Room>
+    + addRoom(room : Room) : void
+    + getRoomById(id : String) : Room
+    + setRequestedTemperature(temp : double) : void
+}
+
+class Room {
+    - id : String
+    - temperature : double
+    - heatingEnabled : boolean
+    - coolingEnabled : boolean
+    + updateHeatingCoolingStates(requestedTemp : double) : void
+}
+
+class Apartment {
+    - ownerName : String
+}
+
+class CommonRoom {
+    - capacity : int
+    - type : CommonRoomType
+}
+
+class CommonRoomType {
+    <<enumeration>>
+    GYM
+    LIBRARY
+    LAUNDRY
+}
+
+class TemperatureManager {
+    + start() : void
+    + stop() : void
+}
+
+Building "1" o-- "*" Room
+Room <|-- Apartment
+Room <|-- CommonRoom
+Building <.. TemperatureManager : "updates"
+@enduml
