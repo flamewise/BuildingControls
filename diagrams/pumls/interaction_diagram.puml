@@ -1,0 +1,25 @@
+@startuml
+actor User
+participant CLI
+participant BuildingController
+participant Building
+participant TemperatureManager
+participant Room
+
+User -> CLI : Start CLI
+activate CLI
+CLI -> BuildingController : getInstance()
+CLI -> BuildingController : addBuilding(id, name)
+BuildingController -> Building : Create Building
+
+CLI -> BuildingController : setRequestedTemperature(temp)
+BuildingController -> Building : Update requestedTemperature
+
+CLI -> TemperatureManager : start()
+activate TemperatureManager
+TemperatureManager -> BuildingController : getAllBuildings()
+BuildingController -> Building : getRooms()
+Building -> Room : updateHeatingCoolingStates(requestedTemp)
+TemperatureManager -> Room : Adjust Temperature
+deactivate TemperatureManager
+@enduml
