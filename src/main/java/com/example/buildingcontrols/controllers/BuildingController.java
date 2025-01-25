@@ -7,11 +7,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BuildingController {
-    private List<Building> buildings;
+    public static BuildingController instance; // Singleton instance
+    public List<Building> buildings;
 
-    // Constructor
+    // Private constructor to prevent instantiation
     public BuildingController() {
         this.buildings = new ArrayList<>();
+    }
+
+    // Public method to get the Singleton instance
+    public static synchronized BuildingController getInstance() {
+        if (instance == null) {
+            instance = new BuildingController();
+        }
+        return instance;
     }
 
     // Add a new building

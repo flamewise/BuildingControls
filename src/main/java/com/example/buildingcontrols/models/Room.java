@@ -43,7 +43,7 @@ public class Room {
         return heatingEnabled;
     }
 
-    public void enableHeating() {
+    public void setHeatingEnabled() {
         this.heatingEnabled = true;
         this.coolingEnabled = false; // Disable cooling if heating is enabled
     }
@@ -56,7 +56,7 @@ public class Room {
         return coolingEnabled;
     }
 
-    public void enableCooling() {
+    public void setCoolingEnabled() {
         this.coolingEnabled = true;
         this.heatingEnabled = false; // Disable heating if cooling is enabled
     }

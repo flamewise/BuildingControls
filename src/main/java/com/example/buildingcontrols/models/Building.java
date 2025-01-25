@@ -7,12 +7,14 @@ public class Building {
     private String id;
     private String name;
     private List<Room> rooms;
+    private double requestedTemperature;
 
     // Constructor
     public Building(String id, String name) {
         this.id = id;
         this.name = name;
         this.rooms = new ArrayList<>();
+        this.requestedTemperature = 20.0; // Default requested temperature
     }
 
     // Getters and Setters
@@ -32,28 +34,50 @@ public class Building {
         return rooms;
     }
 
+    public double getRequestedTemperature() {
+        return requestedTemperature;
+    }
+
+    public void setRequestedTemperature(double requestedTemperature) {
+        this.requestedTemperature = requestedTemperature;
+        updateHeatingAndCooling();
+    }
+
     // Methods to manage rooms
     public void addRoom(Room room) {
         rooms.add(room);
+        updateHeatingAndCoolingForRoom(room);
     }
 
     public Room getRoomById(String roomId) {
         return rooms.stream()
-            .filter(room -> room.getId().equals(roomId))
-            .findFirst()
-            .orElse(null);
+                .filter(room -> room.getId().equals(roomId))
+                .findFirst()
+                .orElse(null);
     }
 
     public void removeRoom(String roomId) {
         rooms.removeIf(room -> room.getId().equals(roomId));
     }
 
-    // Calculate total temperature (example functionality)
-    public double calculateAverageTemperature() {
-        return rooms.stream()
-            .mapToDouble(Room::getTemperature)
-            .average()
-            .orElse(0.0);
+    // Update heating and cooling based on the requested temperature
+    private void updateHeatingAndCooling() {
+        for (Room room : rooms) {
+            updateHeatingAndCoolingForRoom(room);
+        }
+    }
+
+    private void updateHeatingAndCoolingForRoom(Room room) {
+        if (room.getTemperature() < requestedTemperature) {
+            room.setHeatingEnabled();
+            room.setCoolingEnabled();
+        } else if (room.getTemperature() > requestedTemperature) {
+            room.setHeatingEnabled();
+            room.setCoolingEnabled();
+        } else {
+            room.setHeatingEnabled();
+            room.setCoolingEnabled(); // Close enough logic
+        }
     }
 
     @Override
@@ -61,6 +85,7 @@ public class Building {
         return "Building{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
+                ", requestedTemperature=" + requestedTemperature +
                 ", rooms=" + rooms +
                 '}';
     }
