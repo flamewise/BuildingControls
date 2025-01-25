@@ -24,6 +24,7 @@ public class MainWindow extends JFrame {
         temperatureManager = new TemperatureManager(); // Initialize TemperatureManager
         temperatureManager.start(); // Start background temperature management
         initializeUI();
+        initializeDefaultBuilding(); // Add default setup
     }
 
     private void initializeUI() {
@@ -41,6 +42,28 @@ public class MainWindow extends JFrame {
         });
 
         showMainMenu();
+    }
+
+    private void initializeDefaultBuilding() {
+        // Create a default building
+        Building defaultBuilding = new Building("B1", "Default Building");
+        defaultBuilding.setRequestedTemperature(25.0);
+
+        // Add 2 apartments
+        defaultBuilding.addRoom(new Apartment("101", "John Doe"));
+        defaultBuilding.addRoom(new Apartment("102", "Jane Doe"));
+
+        // Add a gym and a library
+        defaultBuilding.addRoom(new CommonRoom("Gym", CommonRoomType.GYM));
+        defaultBuilding.addRoom(new CommonRoom("Library", CommonRoomType.LIBRARY));
+
+        // Calculate initial heating and cooling states for all rooms
+        for (Room room : defaultBuilding.getRooms()) {
+            room.updateHeatingCoolingStates(defaultBuilding.getRequestedTemperature());
+        }
+
+        // Add the building to the controller
+        controller.addBuilding(defaultBuilding);
     }
 
     private void showMainMenu() {
@@ -192,7 +215,6 @@ public class MainWindow extends JFrame {
         revalidate();
         repaint();
     }
-    
 
     private void updateRoomPanel(JPanel roomPanel) {
         roomPanel.removeAll();
@@ -246,7 +268,6 @@ public class MainWindow extends JFrame {
             }
         }
     }
-    
 
     private void adjustTemperature() {
         String newTempStr = JOptionPane.showInputDialog(this, "Enter new temperature for the building:");
@@ -269,5 +290,5 @@ public class MainWindow extends JFrame {
     private void showRoomDetails(Room room) {
         List<Double> temperatureHistory = room.getTemperatureHistory(); // Retrieve the temperature history
         new RoomDetailWindow(this, room, temperatureHistory); // Use RoomDetailWindow to display details
-    }          
+    }
 }
