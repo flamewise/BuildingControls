@@ -50,16 +50,6 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Surefire Plugin for Tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M7</version>
-                <configuration>
-                    <argLine>-Djava.awt.headless=true</argLine>
-                </configuration>
-            </plugin>
-
             <!-- Maven Exec Plugin for Running the Application -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
