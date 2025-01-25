@@ -87,7 +87,7 @@ class CLITest {
     void testViewBuildingDetails() {
         Building building = new Building("B001", "Office Building");
         building.addRoom(new Apartment("A101", "John Doe"));
-        building.addRoom(new CommonRoom("CR201", 50, CommonRoomType.GYM));
+        building.addRoom(new CommonRoom("CR201", CommonRoomType.GYM));
         controller.addBuilding(building);
 
         String input = "4\nB001\n6\n"; // View Building Details, then Exit
