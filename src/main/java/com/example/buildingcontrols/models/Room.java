@@ -43,26 +43,28 @@ public class Room {
         return heatingEnabled;
     }
 
-    public void setHeatingEnabled() {
-        this.heatingEnabled = true;
-        this.coolingEnabled = false; // Disable cooling if heating is enabled
-    }
-
-    public void disableHeating() {
-        this.heatingEnabled = false;
-    }
-
     public boolean isCoolingEnabled() {
         return coolingEnabled;
     }
 
-    public void setCoolingEnabled() {
-        this.coolingEnabled = true;
-        this.heatingEnabled = false; // Disable heating if cooling is enabled
-    }
-
-    public void disableCooling() {
-        this.coolingEnabled = false;
+    /**
+     * Updates the heating and cooling states based on the requested temperature.
+     * Heating and cooling are not triggered if the temperature is within ±0.5 degrees of the requested temperature.
+     *
+     * @param requestedTemperature The temperature requested for the building.
+     */
+    public void updateHeatingCoolingStates(double requestedTemperature) {
+        double tolerance = 0.5;
+        if (temperature < requestedTemperature - tolerance) {
+            heatingEnabled = true;
+            coolingEnabled = false;
+        } else if (temperature > requestedTemperature + tolerance) {
+            coolingEnabled = true;
+            heatingEnabled = false;
+        } else {
+            heatingEnabled = false;
+            coolingEnabled = false; // Within tolerance, neither heating nor cooling
+        }
     }
 
     // toString() Method for Debugging

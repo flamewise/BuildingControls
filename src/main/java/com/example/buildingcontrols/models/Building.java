@@ -40,13 +40,11 @@ public class Building {
 
     public void setRequestedTemperature(double requestedTemperature) {
         this.requestedTemperature = requestedTemperature;
-        updateHeatingAndCooling();
     }
 
     // Methods to manage rooms
     public void addRoom(Room room) {
         rooms.add(room);
-        updateHeatingAndCoolingForRoom(room);
     }
 
     public Room getRoomById(String roomId) {
@@ -58,26 +56,6 @@ public class Building {
 
     public void removeRoom(String roomId) {
         rooms.removeIf(room -> room.getId().equals(roomId));
-    }
-
-    // Update heating and cooling based on the requested temperature
-    private void updateHeatingAndCooling() {
-        for (Room room : rooms) {
-            updateHeatingAndCoolingForRoom(room);
-        }
-    }
-
-    private void updateHeatingAndCoolingForRoom(Room room) {
-        if (room.getTemperature() < requestedTemperature) {
-            room.setHeatingEnabled();
-            room.setCoolingEnabled();
-        } else if (room.getTemperature() > requestedTemperature) {
-            room.setHeatingEnabled();
-            room.setCoolingEnabled();
-        } else {
-            room.setHeatingEnabled();
-            room.setCoolingEnabled(); // Close enough logic
-        }
     }
 
     @Override

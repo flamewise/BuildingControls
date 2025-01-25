@@ -5,16 +5,20 @@ import com.example.buildingcontrols.models.Building;
 import com.example.buildingcontrols.models.Room;
 import com.example.buildingcontrols.models.CommonRoomType;
 import com.example.buildingcontrols.models.CommonRoom;
+import com.example.buildingcontrols.services.TemperatureManager;
 
 import java.util.Scanner;
 
 public class CLI {
     private boolean running;
     private final BuildingController controller;
+    private final TemperatureManager temperatureManager;
 
     public CLI() {
         this.running = true;
         this.controller = BuildingController.getInstance(); // Singleton instance
+        this.temperatureManager = new TemperatureManager(); // Initialize the TemperatureManager
+        this.temperatureManager.start(); // Start the background temperature management
     }
 
     public void start() {
@@ -29,6 +33,7 @@ public class CLI {
         }
 
         System.out.println("Exiting the application. Goodbye!");
+        this.temperatureManager.stop(); // Stop the background temperature management
         scanner.close();
     }
 
@@ -57,7 +62,7 @@ public class CLI {
                 viewBuildingDetails(scanner);
                 break;
             case "5":
-                adjustBuildingTemperature(scanner); // New option
+                adjustBuildingTemperature(scanner);
                 break;
             case "6":
                 running = false;
@@ -65,7 +70,7 @@ public class CLI {
             default:
                 System.out.println("Invalid choice. Please try again.");
         }
-    }       
+    }
 
     private void addBuilding(Scanner scanner) {
         System.out.print("Enter Building ID: ");
@@ -94,7 +99,7 @@ public class CLI {
         } else {
             System.out.println("\nList of Buildings:");
             for (Building building : buildings) {
-                System.out.println(building);
+                System.out.println(building + " | Requested Temp: " + building.getRequestedTemperature() + "°C");
             }
         }
     }
@@ -172,7 +177,7 @@ public class CLI {
                 System.out.println(room);
             }
         }
-    }    
+    }
 
     private void adjustBuildingTemperature(Scanner scanner) {
         System.out.print("Enter Building ID: ");
@@ -198,5 +203,5 @@ public class CLI {
     
         building.setRequestedTemperature(newTemperature);
         System.out.println("Requested temperature updated successfully!");
-    }    
-}    
+    }
+}
