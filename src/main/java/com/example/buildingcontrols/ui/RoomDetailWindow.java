@@ -13,6 +13,9 @@ import java.awt.*;
 import java.util.List;
 
 public class RoomDetailWindow extends JDialog {
+    private DefaultCategoryDataset dataset; // Chart dataset
+    private Timer updateTimer; // Timer for chart updates
+
     public RoomDetailWindow(JFrame parent, Room room, List<Double> temperatureHistory) {
         super(parent, "Room Details", true);
         setSize(800, 600);
@@ -50,19 +53,23 @@ public class RoomDetailWindow extends JDialog {
 
         // Close button
         JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(e -> dispose());
+        closeButton.addActionListener(e -> {
+            if (updateTimer != null) {
+                updateTimer.stop(); // Stop the timer when the window is closed
+            }
+            dispose();
+        });
         add(closeButton, BorderLayout.SOUTH);
+
+        // Start chart update timer
+        startChartUpdateTimer(room);
 
         setVisible(true);
     }
 
     private ChartPanel createChartPanel(Room room) {
-        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
-        int time = 1;
-
-        for (Double temp : room.getTemperatureHistory()) {
-            dataset.addValue(temp, "Temperature", "Update " + time++);
-        }
+        dataset = new DefaultCategoryDataset();
+        populateDataset(room);
 
         JFreeChart chart = ChartFactory.createLineChart(
                 "Temperature History for Room " + room.getId(),
@@ -72,5 +79,21 @@ public class RoomDetailWindow extends JDialog {
         );
 
         return new ChartPanel(chart);
+    }
+
+    private void populateDataset(Room room) {
+        dataset.clear();
+        int time = 1;
+
+        for (Double temp : room.getTemperatureHistory()) {
+            dataset.addValue(temp, "Temperature", "Update " + time++);
+        }
+    }
+
+    private void startChartUpdateTimer(Room room) {
+        updateTimer = new Timer(1000, e -> {
+            populateDataset(room); // Refresh dataset with latest temperature history
+        });
+        updateTimer.start();
     }
 }
