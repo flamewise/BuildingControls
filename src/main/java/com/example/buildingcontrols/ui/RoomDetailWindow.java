@@ -3,6 +3,10 @@ package com.example.buildingcontrols.ui;
 import com.example.buildingcontrols.models.Room;
 import com.example.buildingcontrols.models.Apartment;
 import com.example.buildingcontrols.models.CommonRoom;
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.data.category.DefaultCategoryDataset;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +15,7 @@ import java.util.List;
 public class RoomDetailWindow extends JDialog {
     public RoomDetailWindow(JFrame parent, Room room, List<Double> temperatureHistory) {
         super(parent, "Room Details", true);
-        setSize(400, 300);
+        setSize(800, 600);
         setLayout(new BorderLayout());
         setLocationRelativeTo(parent);
 
@@ -33,15 +37,16 @@ public class RoomDetailWindow extends JDialog {
             details.append("Type: Standard Room\n");
         }
 
-        // Add historical temperature data
-        details.append("\nTemperature History:\n");
-        for (int i = 0; i < temperatureHistory.size(); i++) {
-            details.append("Reading ").append(i + 1).append(": ").append(String.format("%.1f°C", temperatureHistory.get(i))).append("\n");
-        }
-
         JTextArea detailsArea = new JTextArea(details.toString());
         detailsArea.setEditable(false);
-        add(new JScrollPane(detailsArea), BorderLayout.CENTER);
+
+        // Create chart panel
+        ChartPanel chartPanel = createChartPanel(room);
+
+        // Add to split pane
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(detailsArea), chartPanel);
+        splitPane.setDividerLocation(200);
+        add(splitPane, BorderLayout.CENTER);
 
         // Close button
         JButton closeButton = new JButton("Close");
@@ -49,5 +54,23 @@ public class RoomDetailWindow extends JDialog {
         add(closeButton, BorderLayout.SOUTH);
 
         setVisible(true);
+    }
+
+    private ChartPanel createChartPanel(Room room) {
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        int time = 1;
+
+        for (Double temp : room.getTemperatureHistory()) {
+            dataset.addValue(temp, "Temperature", "Update " + time++);
+        }
+
+        JFreeChart chart = ChartFactory.createLineChart(
+                "Temperature History for Room " + room.getId(),
+                "Time (Updates)",
+                "Temperature (°C)",
+                dataset
+        );
+
+        return new ChartPanel(chart);
     }
 }

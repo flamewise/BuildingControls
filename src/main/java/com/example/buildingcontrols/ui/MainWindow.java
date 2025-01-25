@@ -267,30 +267,7 @@ public class MainWindow extends JFrame {
     }
 
     private void showRoomDetails(Room room) {
-        JDialog detailsDialog = new JDialog(this, "Room Details", true);
-        detailsDialog.setSize(300, 200);
-        detailsDialog.setLayout(new BorderLayout());
-    
-        StringBuilder details = new StringBuilder();
-        details.append("Room ID: ").append(room.getId()).append("\n");
-        details.append("Temperature: ").append(String.format("%.1f°C", room.getTemperature())).append("\n");
-    
-        JTextArea detailsArea = new JTextArea(details.toString());
-        detailsArea.setEditable(false);
-        detailsDialog.add(new JScrollPane(detailsArea), BorderLayout.CENTER);
-    
-        JPanel buttonPanel = new JPanel();
-        JButton closeButton = new JButton("Close");
-        JButton chartButton = new JButton("View History Chart");
-    
-        closeButton.addActionListener(e -> detailsDialog.dispose());
-        chartButton.addActionListener(e -> RoomHistoryChart.showRoomChart(room));
-    
-        buttonPanel.add(chartButton);
-        buttonPanel.add(closeButton);
-    
-        detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
-        detailsDialog.setLocationRelativeTo(this);
-        detailsDialog.setVisible(true);
-    }       
+        List<Double> temperatureHistory = room.getTemperatureHistory(); // Retrieve the temperature history
+        new RoomDetailWindow(this, room, temperatureHistory); // Use RoomDetailWindow to display details
+    }          
 }
