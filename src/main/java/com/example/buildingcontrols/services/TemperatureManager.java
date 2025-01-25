@@ -20,7 +20,7 @@ public class TemperatureManager {
         scheduler.shutdown();
     }
 
-    private void updateTemperatures() {
+    protected void updateTemperatures() {
         for (Building building : BuildingController.getInstance().getAllBuildings()) {
             for (Room room : building.getRooms()) {
                 // Update heating/cooling states based on the building's requested temperature
