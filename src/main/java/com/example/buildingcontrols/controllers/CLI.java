@@ -122,8 +122,6 @@ public class CLI {
         String roomType = scanner.nextLine().toLowerCase();
     
         if (roomType.equals("commonroom")) {
-            System.out.print("Enter Capacity: ");
-            int capacity = Integer.parseInt(scanner.nextLine());
     
             System.out.print("Enter Common Room Type (GYM/LIBRARY/LAUNDRY): ");
             String commonRoomType = scanner.nextLine().toUpperCase();
@@ -136,7 +134,7 @@ public class CLI {
                 return;
             }
     
-            CommonRoom commonRoom = new CommonRoom(roomId, capacity, type);
+            CommonRoom commonRoom = new CommonRoom(roomId, type);
             controller.addRoomToBuilding(buildingId, commonRoom);
             System.out.println("Common Room added successfully!");
         } else if (roomType.equals("apartment")) {
