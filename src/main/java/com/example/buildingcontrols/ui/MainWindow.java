@@ -235,37 +235,18 @@ public class MainWindow extends JFrame {
     }
 
     private void addRoom() {
-        String roomId = JOptionPane.showInputDialog(this, "Enter Room ID:");
-        String[] options = {"CommonRoom", "Apartment"};
-        String roomType = (String) JOptionPane.showInputDialog(this, "Select Room Type:",
-                "Room Type", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-        if (roomType == null || roomId == null || roomId.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Invalid input. Try again.");
-            return;
-        }
-
-        if (roomType.equals("CommonRoom")) {
-            String capacityStr = JOptionPane.showInputDialog(this, "Enter Capacity:");
-            int capacity = Integer.parseInt(capacityStr);
-
-            String[] commonRoomTypes = {"GYM", "LIBRARY", "LAUNDRY"};
-            String commonRoomType = (String) JOptionPane.showInputDialog(this, "Select Common Room Type:",
-                    "Common Room Type", JOptionPane.QUESTION_MESSAGE, null, commonRoomTypes, commonRoomTypes[0]);
-
-            if (commonRoomType == null) {
-                JOptionPane.showMessageDialog(this, "Invalid input. Try again.");
-                return;
+        AddRoomDialog dialog = new AddRoomDialog(this);
+        if (dialog.isConfirmed()) {
+            Room newRoom = dialog.getNewRoom();
+            if (currentBuilding != null) {
+                currentBuilding.addRoom(newRoom);
+                JOptionPane.showMessageDialog(this, "Room added successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "No building selected. Please select a building first.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-
-            currentBuilding.addRoom(new Room(roomId)); // Adjust Room creation logic here.
-            JOptionPane.showMessageDialog(this, "Common Room added successfully!");
-        } else if (roomType.equals("Apartment")) {
-            String ownerName = JOptionPane.showInputDialog(this, "Enter Owner Name:");
-            currentBuilding.addRoom(new Room(roomId)); // Adjust Room creation logic here.
-            JOptionPane.showMessageDialog(this, "Apartment added successfully!");
         }
     }
+    
 
     private void adjustTemperature() {
         String newTempStr = JOptionPane.showInputDialog(this, "Enter new temperature for the building:");
@@ -286,8 +267,30 @@ public class MainWindow extends JFrame {
     }
 
     private void showRoomDetails(Room room) {
-        // Assuming the Room class has a method to fetch temperature history.
-        List<Double> temperatureHistory = room.getTemperatureHistory(); // Add this method to Room if it doesn't exist.
-        new RoomDetailWindow(this, room, temperatureHistory);
-    }      
+        JDialog detailsDialog = new JDialog(this, "Room Details", true);
+        detailsDialog.setSize(300, 200);
+        detailsDialog.setLayout(new BorderLayout());
+    
+        StringBuilder details = new StringBuilder();
+        details.append("Room ID: ").append(room.getId()).append("\n");
+        details.append("Temperature: ").append(String.format("%.1f°C", room.getTemperature())).append("\n");
+    
+        JTextArea detailsArea = new JTextArea(details.toString());
+        detailsArea.setEditable(false);
+        detailsDialog.add(new JScrollPane(detailsArea), BorderLayout.CENTER);
+    
+        JPanel buttonPanel = new JPanel();
+        JButton closeButton = new JButton("Close");
+        JButton chartButton = new JButton("View History Chart");
+    
+        closeButton.addActionListener(e -> detailsDialog.dispose());
+        chartButton.addActionListener(e -> RoomHistoryChart.showRoomChart(room));
+    
+        buttonPanel.add(chartButton);
+        buttonPanel.add(closeButton);
+    
+        detailsDialog.add(buttonPanel, BorderLayout.SOUTH);
+        detailsDialog.setLocationRelativeTo(this);
+        detailsDialog.setVisible(true);
+    }       
 }
