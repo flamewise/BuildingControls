@@ -24,6 +24,7 @@ public class MainWindow extends JFrame {
         temperatureManager = new TemperatureManager(); // Initialize TemperatureManager
         temperatureManager.start(); // Start background temperature management
         initializeUI();
+        initializeDefaultBuilding(); // Add default setup
     }
 
     private void initializeUI() {
@@ -41,6 +42,28 @@ public class MainWindow extends JFrame {
         });
 
         showMainMenu();
+    }
+
+    private void initializeDefaultBuilding() {
+        // Create a default building
+        Building defaultBuilding = new Building("B1", "Default Building");
+        defaultBuilding.setRequestedTemperature(25.0);
+
+        // Add 2 apartments
+        defaultBuilding.addRoom(new Apartment("101", "John Doe"));
+        defaultBuilding.addRoom(new Apartment("102", "Jane Doe"));
+
+        // Add a gym and a library
+        defaultBuilding.addRoom(new CommonRoom("Gym", CommonRoomType.GYM));
+        defaultBuilding.addRoom(new CommonRoom("Library", CommonRoomType.LIBRARY));
+
+        // Calculate initial heating and cooling states for all rooms
+        for (Room room : defaultBuilding.getRooms()) {
+            room.updateHeatingCoolingStates(defaultBuilding.getRequestedTemperature());
+        }
+
+        // Add the building to the controller
+        controller.addBuilding(defaultBuilding);
     }
 
     private void showMainMenu() {
@@ -192,7 +215,6 @@ public class MainWindow extends JFrame {
         revalidate();
         repaint();
     }
-    
 
     private void updateRoomPanel(JPanel roomPanel) {
         roomPanel.removeAll();
@@ -235,35 +257,15 @@ public class MainWindow extends JFrame {
     }
 
     private void addRoom() {
-        String roomId = JOptionPane.showInputDialog(this, "Enter Room ID:");
-        String[] options = {"CommonRoom", "Apartment"};
-        String roomType = (String) JOptionPane.showInputDialog(this, "Select Room Type:",
-                "Room Type", JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-
-        if (roomType == null || roomId == null || roomId.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Invalid input. Try again.");
-            return;
-        }
-
-        if (roomType.equals("CommonRoom")) {
-            String capacityStr = JOptionPane.showInputDialog(this, "Enter Capacity:");
-            int capacity = Integer.parseInt(capacityStr);
-
-            String[] commonRoomTypes = {"GYM", "LIBRARY", "LAUNDRY"};
-            String commonRoomType = (String) JOptionPane.showInputDialog(this, "Select Common Room Type:",
-                    "Common Room Type", JOptionPane.QUESTION_MESSAGE, null, commonRoomTypes, commonRoomTypes[0]);
-
-            if (commonRoomType == null) {
-                JOptionPane.showMessageDialog(this, "Invalid input. Try again.");
-                return;
+        AddRoomDialog dialog = new AddRoomDialog(this);
+        if (dialog.isConfirmed()) {
+            Room newRoom = dialog.getNewRoom();
+            if (currentBuilding != null) {
+                currentBuilding.addRoom(newRoom);
+                JOptionPane.showMessageDialog(this, "Room added successfully!");
+            } else {
+                JOptionPane.showMessageDialog(this, "No building selected. Please select a building first.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-
-            currentBuilding.addRoom(new Room(roomId)); // Adjust Room creation logic here.
-            JOptionPane.showMessageDialog(this, "Common Room added successfully!");
-        } else if (roomType.equals("Apartment")) {
-            String ownerName = JOptionPane.showInputDialog(this, "Enter Owner Name:");
-            currentBuilding.addRoom(new Room(roomId)); // Adjust Room creation logic here.
-            JOptionPane.showMessageDialog(this, "Apartment added successfully!");
         }
     }
 
@@ -286,32 +288,7 @@ public class MainWindow extends JFrame {
     }
 
     private void showRoomDetails(Room room) {
-        JDialog detailsDialog = new JDialog(this, "Room Details", true);
-        detailsDialog.setSize(300, 200);
-        detailsDialog.setLayout(new BorderLayout());
-    
-        StringBuilder details = new StringBuilder();
-        details.append("Room ID: ").append(room.getId()).append("\n");
-        details.append("Temperature: ").append(String.format("%.1f°C", room.getTemperature())).append("\n");
-    
-        if (room instanceof Apartment) {
-            details.append("Type: Apartment\n");
-            details.append("Owner Name: ").append(((Apartment) room).getOwnerName()).append("\n");
-        } else if (room instanceof CommonRoom) {
-            details.append("Type: Common Room\n");
-            details.append("Capacity: ").append(((CommonRoom) room).getCapacity()).append("\n");
-            details.append("Common Room Type: ").append(((CommonRoom) room).getType()).append("\n");
-        }
-    
-        JTextArea detailsArea = new JTextArea(details.toString());
-        detailsArea.setEditable(false);
-        detailsDialog.add(new JScrollPane(detailsArea), BorderLayout.CENTER);
-    
-        JButton closeButton = new JButton("Close");
-        closeButton.addActionListener(e -> detailsDialog.dispose());
-        detailsDialog.add(closeButton, BorderLayout.SOUTH);
-    
-        detailsDialog.setLocationRelativeTo(this);
-        detailsDialog.setVisible(true);
-    }    
+        List<Double> temperatureHistory = room.getTemperatureHistory(); // Retrieve the temperature history
+        new RoomDetailWindow(this, room, temperatureHistory); // Use RoomDetailWindow to display details
+    }
 }

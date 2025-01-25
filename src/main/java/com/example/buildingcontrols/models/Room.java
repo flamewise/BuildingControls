@@ -1,12 +1,16 @@
 package com.example.buildingcontrols.models;
 
 import java.util.Random;
+import java.awt.*;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Room {
     private String id;
     private double temperature; // Default random value between 10 and 40
     private boolean heatingEnabled;
     private boolean coolingEnabled;
+    private List<Double> temperatureHistory;
 
     // Constructor
     public Room(String id) {
@@ -14,6 +18,22 @@ public class Room {
         this.temperature = generateRandomTemperature(10, 40);
         this.heatingEnabled = false;
         this.coolingEnabled = false;
+        this.temperatureHistory = new ArrayList<>();
+        recordTemperature();
+    }
+
+    // Record the current temperature in the history
+    private void recordTemperature() {
+        temperatureHistory.add(temperature);
+    }
+
+    public void setTemperature(double temperature) {
+        this.temperature = temperature;
+        recordTemperature();
+    }
+
+    public List<Double> getTemperatureHistory() {
+        return new ArrayList<>(temperatureHistory); // Return a copy to prevent external modification
     }
 
     // Generate a random temperature between min and max
@@ -33,10 +53,6 @@ public class Room {
 
     public double getTemperature() {
         return temperature;
-    }
-
-    public void setTemperature(double temperature) {
-        this.temperature = temperature;
     }
 
     public boolean isHeatingEnabled() {
