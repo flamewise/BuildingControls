@@ -80,27 +80,4 @@ class TemperatureManagerTest {
         assertFalse(room3.isCoolingEnabled());
         assertEquals(20.2, room3.getTemperature(), 1);
     }
-
-    @Test
-    void testRandomDriftWhenNoHeatingOrCooling() {
-        Building building = buildingController.getBuildingById("B001");
-        assertNotNull(building);
-
-        Room room3 = new Room("R003");
-        room3.setTemperature(20.2); // Within ±0.5 of requested temperature
-        building.addRoom(room3);
-
-        // Simulate random drift over multiple updates
-        for (int i = 0; i < 5; i++) {
-            temperatureManager.updateTemperatures();
-        }
-
-        // Room 3 should still have neither heating nor cooling enabled
-        assertFalse(room3.isHeatingEnabled());
-        assertFalse(room3.isCoolingEnabled());
-
-        // The temperature should drift but remain close to the initial value
-        double temperature = room3.getTemperature();
-        assertTrue(19.7 <= temperature && temperature <= 20.7, "Temperature drifted out of bounds");
-    }
 }

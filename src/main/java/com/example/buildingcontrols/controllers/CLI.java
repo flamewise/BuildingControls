@@ -19,6 +19,8 @@ public class CLI {
         this.controller = BuildingController.getInstance(); // Singleton instance
         this.temperatureManager = new TemperatureManager(); // Initialize the TemperatureManager
         this.temperatureManager.start(); // Start the background temperature management
+
+        initializeDefaultBuilding(); // Initialize default settings
     }
 
     public void start() {
@@ -70,6 +72,29 @@ public class CLI {
             default:
                 System.out.println("Invalid choice. Please try again.");
         }
+    }
+
+    private void initializeDefaultBuilding() {
+        System.out.println("Initializing default building and rooms...");
+
+        Building defaultBuilding = new Building("B1", "Default Building");
+        defaultBuilding.setRequestedTemperature(25.0);
+
+        // Adding apartments
+        defaultBuilding.addRoom(new Apartment("101", "John Doe"));
+        defaultBuilding.addRoom(new Apartment("102", "Jane Doe"));
+
+        // Adding common rooms
+        defaultBuilding.addRoom(new CommonRoom("Gym", CommonRoomType.GYM));
+        defaultBuilding.addRoom(new CommonRoom("Library", CommonRoomType.LIBRARY));
+
+        // Setting initial heating/cooling states
+        for (Room room : defaultBuilding.getRooms()) {
+            room.updateHeatingCoolingStates(defaultBuilding.getRequestedTemperature());
+        }
+
+        controller.addBuilding(defaultBuilding);
+        System.out.println("Default building and rooms initialized.");
     }
 
     private void addBuilding(Scanner scanner) {
