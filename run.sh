@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo "Choose the mode of operation:"
-echo "1. GUI (requires local environment with Java)"
+echo "1. GUI (requires local environment with Java, Recommand)"
 echo "2. CLI (runs in Docker)"
 read -p "Enter your choice (1 or 2): " choice
 
