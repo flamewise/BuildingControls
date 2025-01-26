@@ -54,4 +54,9 @@ public class BuildingController {
         Building building = getBuildingById(buildingId);
         return building != null ? building.getRooms() : null;
     }
+
+    // Clear all buildings (for testing purposes)
+    public void clearAllBuildings() {
+        buildings.clear();
+    }
 }
