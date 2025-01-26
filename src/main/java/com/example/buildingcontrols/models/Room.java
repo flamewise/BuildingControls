@@ -1,7 +1,6 @@
 package com.example.buildingcontrols.models;
 
 import java.util.Random;
-import java.awt.*;
 import java.util.List;
 import java.util.ArrayList;
 
