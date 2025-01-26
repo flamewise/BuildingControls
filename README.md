@@ -79,9 +79,16 @@ The GUI mode provides a graphical interface for interacting with the application
 
 ## Run Junit Test
 
+To run the tests for this project, use the following command:
+
 ```bash
 mvn test
 ```
+
+Once the tests have run, you should see output similar to the screenshot below:
+![Test Results Screenshot](diagrams/png/Test.png)
+
+This output confirms the number of tests run, passed, and failed. Make sure all tests pass before deploying or committing changes.
 
 ## Bash Script Details 📜
 
