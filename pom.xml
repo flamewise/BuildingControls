@@ -8,6 +8,7 @@
     <version>1.0-SNAPSHOT</version>
 
     <properties>
+        <!-- Java version compatibility -->
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
     </properties>
@@ -21,7 +22,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Mockito for Mocking -->
+        <!-- Mockito for Mocking in unit tests -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
@@ -29,7 +30,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- JFreeChart -->
+        <!-- JFreeChart for generating charts -->
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
@@ -50,7 +51,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Exec Plugin for Running the Application -->
+            <!-- Maven Exec Plugin to Run the Application Directly -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -60,7 +61,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven JAR Plugin to specify the Main Class -->
+            <!-- Maven JAR Plugin to Specify the Main Class -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -72,6 +73,25 @@
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+
+            <!-- Maven Shade Plugin to Create a Fat/Uber JAR -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Avoid generating a reduced POM -->
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

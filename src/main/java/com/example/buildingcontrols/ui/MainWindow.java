@@ -11,7 +11,6 @@ import com.example.buildingcontrols.services.TemperatureManager;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
-import javax.swing.Timer;
 
 public class MainWindow extends JFrame {
     private final BuildingController controller;
@@ -167,13 +166,38 @@ public class MainWindow extends JFrame {
         getContentPane().removeAll();
         setLayout(new BorderLayout());
     
+        // Top Panel with Building Details and Legend
+        JPanel topPanel = new JPanel(new GridLayout(2, 1));
+    
         // Building Details Panel
-        JPanel buildingDetailsPanel = new JPanel(new GridLayout(2, 1));
+        JPanel buildingDetailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         JLabel buildingNameLabel = new JLabel("Building Name: " + currentBuilding.getName());
+        JLabel buildingIdLabel = new JLabel("Building ID: " + currentBuilding.getId());
         JLabel requestedTempLabel = new JLabel("Requested Temperature: " + currentBuilding.getRequestedTemperature() + "°C");
         buildingDetailsPanel.add(buildingNameLabel);
+        buildingDetailsPanel.add(buildingIdLabel);
         buildingDetailsPanel.add(requestedTempLabel);
-        add(buildingDetailsPanel, BorderLayout.NORTH);
+    
+        // Legend Panel
+        JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JLabel legendLabel = new JLabel("Legend: ");
+        JLabel redLabel = new JLabel("● Heater Enabled");
+        redLabel.setForeground(Color.RED);
+        JLabel blueLabel = new JLabel("● Cooler Enabled");
+        blueLabel.setForeground(Color.BLUE);
+        JLabel grayLabel = new JLabel("● Neither");
+        grayLabel.setForeground(Color.GRAY);
+        legendPanel.add(legendLabel);
+        legendPanel.add(redLabel);
+        legendPanel.add(blueLabel);
+        legendPanel.add(grayLabel);
+    
+        // Add Panels to Top Panel
+        topPanel.add(buildingDetailsPanel);
+        topPanel.add(legendPanel);
+    
+        // Add Top Panel to Main Layout
+        add(topPanel, BorderLayout.NORTH);
     
         // Room Details Panel
         JPanel roomPanel = new JPanel();
@@ -190,16 +214,21 @@ public class MainWindow extends JFrame {
     
         // Button Panel
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new GridLayout(1, 3));
+        buttonPanel.setLayout(new GridLayout(1, 4));
     
         JButton addRoomButton = new JButton("Add Room/Apartment");
         JButton adjustTemperatureButton = new JButton("Adjust Building Temperature");
+        JButton recalculateButton = new JButton("Recalculate"); // New Button
         JButton returnButton = new JButton("Return to Main Menu");
     
         addRoomButton.addActionListener(e -> addRoom());
         adjustTemperatureButton.addActionListener(e -> {
             adjustTemperature();
             requestedTempLabel.setText("Requested Temperature: " + currentBuilding.getRequestedTemperature() + "°C");
+        });
+        recalculateButton.addActionListener(e -> {
+            recalculateRooms(); // Action for Recalculate
+            updateRoomPanel(roomPanel); // Refresh room statuses
         });
         returnButton.addActionListener(e -> {
             currentBuilding = null; // Clear current session
@@ -209,12 +238,24 @@ public class MainWindow extends JFrame {
     
         buttonPanel.add(addRoomButton);
         buttonPanel.add(adjustTemperatureButton);
+        buttonPanel.add(recalculateButton);
         buttonPanel.add(returnButton);
         add(buttonPanel, BorderLayout.SOUTH);
     
         revalidate();
         repaint();
-    }
+    }    
+
+    private void recalculateRooms() {
+        if (currentBuilding != null) {
+            for (Room room : currentBuilding.getRooms()) {
+                room.updateHeatingCoolingStates(currentBuilding.getRequestedTemperature());
+            }
+            JOptionPane.showMessageDialog(this, "Room statuses updated successfully!");
+        } else {
+            JOptionPane.showMessageDialog(this, "No building selected. Please select a building first.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }    
 
     private void updateRoomPanel(JPanel roomPanel) {
         roomPanel.removeAll();
