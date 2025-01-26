@@ -60,22 +60,11 @@ public class Building {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
-        builder.append("Building Details:\n");
-        builder.append("ID: ").append(id).append("\n");
-        builder.append("Name: ").append(name).append("\n");
-        builder.append("Requested Temperature: ").append(requestedTemperature).append("°C\n");
-        builder.append("Rooms:\n");
-    
-        if (rooms.isEmpty()) {
-            builder.append("  No rooms available.\n");
-        } else {
-            for (Room room : rooms) {
-                builder.append("  - ").append(room.toString()).append("\n");
-            }
-        }
-    
-        return builder.toString();
+        return "Building{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", requestedTemperature=" + requestedTemperature +
+                ", rooms=" + rooms +
+                '}';
     }
-    
 }
