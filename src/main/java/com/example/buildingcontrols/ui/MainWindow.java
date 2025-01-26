@@ -16,7 +16,6 @@ public class MainWindow extends JFrame {
     private final BuildingController controller;
     private final TemperatureManager temperatureManager; // Background temperature management
     private Building currentBuilding;
-    private Timer roomUpdateTimer;
 
     public MainWindow() {
         controller = BuildingController.getInstance();
