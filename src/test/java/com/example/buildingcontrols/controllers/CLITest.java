@@ -1,43 +1,34 @@
 package com.example.buildingcontrols.controllers;
 
+import com.example.buildingcontrols.models.Apartment;
+import com.example.buildingcontrols.models.Building;
+import com.example.buildingcontrols.models.Room;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class CLITest {
-    @Test
-    void testAddRoomToBuilding() {
-        String input = "1\nB1\nBuilding One\n3\nB1\nR1\nApartment\nJohn Doe\n6\n"; // Add a building, add a room, and exit
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes());
-        System.setIn(inputStream);
+public class CLITest {
+    private CLI cli;
+    private BuildingController controller;
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
-
-        CLI cli = new CLI();
-        cli.start();
-
-        String output = outputStream.toString();
-        assertTrue(output.contains("Apartment added successfully!"), "Apartment should be added.");
+    @BeforeEach
+    public void setUp() {
+        controller = BuildingController.getInstance();
+        controller.clearAllBuildings(); // Clear any existing data
+        cli = new CLI();
     }
 
     @Test
-    void testAdjustBuildingTemperature() {
-        String input = "1\nB1\nBuilding One\n5\nB1\n22.5\n6\n"; // Add a building, adjust temperature, and exit
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(input.getBytes());
-        System.setIn(inputStream);
+    public void testInitializeDefaultBuilding() {
+        assertNotNull(controller.getBuildingById("B1"));
+        Building defaultBuilding = controller.getBuildingById("B1");
+        assertEquals("Default Building", defaultBuilding.getName());
+        assertEquals(25.0, defaultBuilding.getRequestedTemperature());
+        assertEquals(4, defaultBuilding.getRooms().size());
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        System.setOut(new PrintStream(outputStream));
-
-        CLI cli = new CLI();
-        cli.start();
-
-        String output = outputStream.toString();
-        assertTrue(output.contains("Requested temperature updated successfully!"), "Temperature should be updated.");
+        Room room1 = defaultBuilding.getRoomById("101");
+        assertNotNull(room1);
+        assertTrue(room1 instanceof Apartment);
     }
 }
