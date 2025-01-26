@@ -277,24 +277,22 @@ public class MainWindow extends JFrame {
                 statusIcon.setForeground(Color.GRAY); // Neither
             }
     
+            // View Details Button
+            JButton viewDetailsButton = new JButton("View Details");
+            viewDetailsButton.addActionListener(e -> showRoomDetails(room));
+    
+            // Add components to the row
             roomRow.add(roomIdLabel);
             roomRow.add(tempLabel);
             roomRow.add(statusIcon);
-    
-            // Add Mouse Listener for Details
-            roomRow.addMouseListener(new java.awt.event.MouseAdapter() {
-                @Override
-                public void mouseClicked(java.awt.event.MouseEvent e) {
-                    showRoomDetails(room);
-                }
-            });
+            roomRow.add(viewDetailsButton); // Add the button to the row
     
             roomPanel.add(roomRow);
         }
     
         roomPanel.revalidate();
         roomPanel.repaint();
-    }
+    }    
 
     private void addRoom() {
         AddRoomDialog dialog = new AddRoomDialog(this);
