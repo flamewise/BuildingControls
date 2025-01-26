@@ -77,9 +77,62 @@ The GUI mode provides a graphical interface for interacting with the application
 
 ---
 
+## Run Junit Test
+
+```bash
+mvn test
+```
+
 ## Bash Script Details 📜
 
 The `run.sh` script automates the following tasks:
 
 - 🛠️ Compiles the project using Maven.
 - 🚀 Runs the application in the selected mode.
+
+## Development Process 🛠️
+
+### Issue Tracking and Branching Strategy
+- This project uses GitHub Issues to manage and track feature requests, bug fixes, and improvements.
+- Each issue is associated with a dedicated branch named using the format `type/#<issue-number>-<short-description>` for clear tracking and collaboration.
+- Pull requests are created and reviewed before merging into the main or develop branches.
+- Screenshot example of GitHub Issues:
+![Issue Tracking Example](diagrams/png/issue_tracking.png)
+
+### Continuous Integration
+- Integrated with GitHub Actions for automated testing and validation of new commits and pull requests.
+- Ensures consistent code quality and prevents regressions during development.
+- Screenshot example of GitHub Actions:
+![GitHub Actions Example](diagrams/png/github_actions_placeholder.png)
+
+### Realistic Temperature Adjustments Using Normal Distribution 📈🌡️
+
+The application leverages a **normal distribution** to simulate temperature adjustments, aiming to mimic real-world behavior where changes are not uniform or linear. This approach provides a more natural and realistic progression of room temperatures, ensuring gradual and varied updates.
+
+#### Key Design Elements:
+1. **Temperature Adjustment Based on System State**:
+   - **Heating Enabled**: A positive adjustment is applied, gradually increasing the room temperature.
+   - **Cooling Enabled**: A negative adjustment is applied, gradually decreasing the room temperature.
+   - **No Heating or Cooling**: Minor random fluctuations are introduced to simulate natural environmental changes.
+
+2. **Normal Distribution for Adjustments**:
+   - The system uses a **mean (average)** adjustment value of `0.5` for heating or cooling, representing typical changes over time.
+   - A **standard deviation (spread)** of `0.1` ensures variation, creating a more dynamic and lifelike simulation.
+   - Adjustments are generated using the formula:
+     ```java
+     mean + stdDev * random.nextGaussian();
+     ```
+
+3. **Minor Fluctuations for Inactivity**:
+   - When neither heating nor cooling is active, small random fluctuations centered around `0.0` are introduced, with a standard deviation of `0.1`.
+   - This simulates slight environmental changes even in stable conditions.
+
+4. **Clamping for Stability**:
+   - Room temperatures are clamped within ±1.0°C of the building's requested temperature to avoid unrealistic deviations while maintaining flexibility for natural changes.
+
+#### Benefits of Normal Distribution Design:
+- **Realism**: Mimics the randomness and gradual nature of temperature changes in real-world systems.
+- **Dynamic Behavior**: Prevents abrupt or uniform updates, keeping the simulation engaging and accurate.
+- **Controlled Fluctuations**: Ensures temperature adjustments are meaningful and within realistic bounds.
+
+By integrating normal distribution, the application achieves a balance between realism and control, offering users an intuitive and lifelike temperature control experience. This approach aligns with findings by Sempey et al. (2009), who highlighted the importance of fast simulations and realistic distributions for temperature control systems in air-conditioned rooms【Sempey et al., 2009】.
